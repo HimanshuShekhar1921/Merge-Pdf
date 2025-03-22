@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Prishu Merge PDF</title>
+		<style>
+			/* General Reset */
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: 'Arial', sans-serif;
+				background-color: #e0e5ec;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: 100vh;
+				padding: 20px;
+			}
+
+			.container {
+				background: #e0e5ec;
+				padding: 30px;
+				border-radius: 20px;
+				box-shadow: 10px 10px 20px #a3b1c6, -10px -10px 20px #ffffff;
+				max-width: 800px;
+				width: 100%;
+			}
+
+			h1,
+			h2 {
+				text-align: center;
+				color: #333;
+				margin-bottom: 20px;
+			}
+
+			.upload-section {
+				margin-bottom: 20px;
+			}
+
+			.upload-label {
+				display: block;
+				padding: 10px 20px;
+				background: #e0e5ec;
+				border-radius: 10px;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+				text-align: center;
+				cursor: pointer;
+				color: #333;
+				margin-bottom: 10px;
+			}
+
+			.upload-label:hover {
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+			}
+
+			#pdf-files {
+				display: none;
+			}
+
+			.progress-bar {
+				width: 100%;
+				height: 10px;
+				background: #e0e5ec;
+				border-radius: 5px;
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+				margin-top: 10px;
+				overflow: hidden;
+			}
+
+			.progress {
+				width: 0%;
+				height: 100%;
+				background: #4caf50;
+				transition: width 0.3s ease;
+			}
+
+			.progress-text {
+				text-align: center;
+				margin-top: 5px;
+				color: #333;
+			}
+
+			#merge-btn {
+				display: block;
+				width: 100%;
+				padding: 10px 20px;
+				background: #e0e5ec;
+				border: none;
+				border-radius: 10px;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+				color: #333;
+				cursor: pointer;
+				margin-bottom: 20px;
+			}
+
+			#merge-btn:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+
+			#merge-btn:hover:not(:disabled) {
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+			}
+
+			.result-section {
+				margin-top: 20px;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 10px;
+			}
+
+			th,
+			td {
+				padding: 10px;
+				text-align: left;
+				border-bottom: 1px solid #ddd;
+			}
+
+			th {
+				background-color: #e0e5ec;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+			}
+
+			#download-link {
+				display: block;
+				text-align: center;
+				margin-top: 20px;
+				padding: 10px 20px;
+				background: #e0e5ec;
+				border-radius: 10px;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+				color: #333;
+				text-decoration: none;
+			}
+
+			#download-link:hover {
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+			}
+
+			#reset-btn {
+				display: block;
+				width: 100%;
+				padding: 10px 20px;
+				background: #e0e5ec;
+				border: none;
+				border-radius: 10px;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+				color: #333;
+				cursor: pointer;
+				margin-top: 10px;
+			}
+
+			#reset-btn:hover {
+				box-shadow: inset 5px 5px 10px #a3b1c6, inset -5px -5px 10px #ffffff;
+			}
+
+			/* Content Sections */
+			.content-section {
+				margin-top: 40px;
+			}
+
+			.topic-section {
+				background: #e0e5ec;
+				padding: 20px;
+				border-radius: 15px;
+				box-shadow: 5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff;
+				margin-bottom: 30px;
+			}
+
+			.topic-title {
+				color: #ff4d4d;
+				/* Red */
+				margin-bottom: 15px;
+			}
+
+			.subtopic {
+				margin-bottom: 15px;
+			}
+
+			.subtopic-title {
+				color: #33cc33;
+				/* Green */
+				margin-bottom: 10px;
+			}
+
+			.description {
+				color: #3399ff;
+				/* Blue */
+				line-height: 1.6;
+			}
+
+			/* Responsive Design */
+			@media (max-width: 600px) {
+				.container {
+					padding: 20px;
+				}
+
+				h1 {
+					font-size: 24px;
+				}
+
+				h2 {
+					font-size: 20px;
+				}
+
+				.upload-label,
+				#merge-btn,
+				#download-link,
+				#reset-btn {
+					font-size: 14px;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<!-- Tool Section -->
+			<h1>Prishu Merge PDF 📄➡️📄</h1>
+			<div class="upload-section">
+				<input type="file" id="pdf-files" multiple accept="application/pdf">
+				<label for="pdf-files" class="upload-label">Choose PDF Files</label>
+				<div class="progress-bar">
+					<div class="progress"></div>
+				</div>
+				<p class="progress-text">0%</p>
+			</div>
+			<button id="merge-btn" disabled>Merge PDFs 🛠️</button>
+			<div class="result-section">
+				<h2>Merged PDF Result 📑</h2>
+				<table id="result-table">
+					<thead>
+						<tr>
+							<th>File Name</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Rows will be added dynamically -->
+					</tbody>
+				</table>
+			</div>
+			<a id="download-link" style="display: none;">Download Merged PDF 📥</a>
+			<button id="reset-btn" style="display: none;">Merge Other PDFs 🔄</button>
+
+			<!-- Content Sections -->
+			<div class="content-section">
+				<!-- Why We Chose It -->
+				<section class="topic-section">
+					<h2 class="topic-title">Why We Chose It</h2>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Efficiency</h3>
+						<p class="description">Our Merge PDF tool is designed to save you time by combining multiple PDF files into one with just a few clicks.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Simplicity</h3>
+						<p class="description">With a user-friendly interface, even beginners can easily merge PDFs without any hassle.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Security</h3>
+						<p class="description">Your files are processed locally on your device, ensuring complete privacy and security.</p>
+					</div>
+				</section>
+
+				<!-- How It Works -->
+				<section class="topic-section">
+					<h2 class="topic-title">How It Works</h2>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Upload Files</h3>
+						<p class="description">Select the PDF files you want to merge using the file input or drag-and-drop feature.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Merge Process</h3>
+						<p class="description">The tool uses the PDF-Lib library to combine the selected files into a single PDF.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Download Result</h3>
+						<p class="description">Once merged, you can download the final PDF file with a single click.</p>
+					</div>
+				</section>
+
+				<!-- How to Use -->
+				<section class="topic-section">
+					<h2 class="topic-title">How to Use</h2>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Step 1: Select Files</h3>
+						<p class="description">Click the "Choose PDF Files" button to upload your PDFs.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Step 2: Merge Files</h3>
+						<p class="description">Click the "Merge PDFs" button to start the merging process.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Step 3: Download</h3>
+						<p class="description">After merging, click the "Download Merged PDF" link to save the file.</p>
+					</div>
+				</section>
+
+				<!-- FAQs -->
+				<section class="topic-section">
+					<h2 class="topic-title">Frequently Asked Questions (FAQs)</h2>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Is this tool free to use?</h3>
+						<p class="description">Yes, the Merge PDF tool is completely free to use.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Are my files secure?</h3>
+						<p class="description">Absolutely! All file processing happens locally on your device, and no data is uploaded to any server.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">Can I merge more than 10 files?</h3>
+						<p class="description">Yes, you can merge as many files as you want, but larger files may take longer to process.</p>
+					</div>
+					<div class="subtopic">
+						<h3 class="subtopic-title">What if I encounter an error?</h3>
+						<p class="description">If you encounter any issues, refresh the page and try again. If the problem persists, contact support.</p>
+					</div>
+				</section>
+			</div>
+		</div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+		<script>
+			document.getElementById('pdf-files').addEventListener('change', handleFileSelect);
+			document.getElementById('merge-btn').addEventListener('click', mergePDFs);
+			document.getElementById('reset-btn').addEventListener('click', resetApp);
+
+			let selectedFiles = [];
+
+			// Handle file selection
+			function handleFileSelect(event) {
+				selectedFiles = Array.from(event.target.files);
+				updateProgress(0); // Reset progress bar
+				updateTable(); // Update the table with selected files
+				document.getElementById('merge-btn').disabled = false; // Enable merge button
+			}
+
+			// Update progress bar and text
+			function updateProgress(percentage) {
+				const progressBar = document.querySelector('.progress');
+				const progressText = document.querySelector('.progress-text');
+				progressBar.style.width = `${percentage}%`;
+				progressText.textContent = `${percentage}%`;
+			}
+
+			// Update the table with selected files
+			function updateTable() {
+				const tableBody = document.querySelector('#result-table tbody');
+				tableBody.innerHTML = ''; // Clear existing rows
+
+				selectedFiles.forEach((file) => {
+					const row = document.createElement('tr');
+					const fileNameCell = document.createElement('td');
+					fileNameCell.textContent = file.name;
+					const statusCell = document.createElement('td');
+					statusCell.textContent = 'Ready ✅';
+					row.appendChild(fileNameCell);
+					row.appendChild(statusCell);
+					tableBody.appendChild(row);
+				});
+			}
+
+			// Merge PDFs
+			async function mergePDFs() {
+				const {
+					PDFDocument
+				} = PDFLib;
+				const mergedPdf = await PDFDocument.create();
+				let progress = 0;
+				const progressIncrement = 100 / selectedFiles.length;
+
+				for (const file of selectedFiles) {
+					try {
+						const arrayBuffer = await file.arrayBuffer();
+						const pdfDoc = await PDFDocument.load(arrayBuffer);
+						const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+						copiedPages.forEach((page) => mergedPdf.addPage(page));
+						progress += progressIncrement;
+						updateProgress(progress);
+					} catch (error) {
+						alert(`Error merging ${file.name}: ${error.message}`);
+						return;
+					}
+				}
+
+				// Save merged PDF
+				const mergedPdfBytes = await mergedPdf.save();
+				const blob = new Blob([mergedPdfBytes], {
+					type: 'application/pdf'
+				});
+				const url = URL.createObjectURL(blob);
+
+				// Show download link
+				const downloadLink = document.getElementById('download-link');
+				downloadLink.href = url;
+				downloadLink.download = 'merged.pdf';
+				downloadLink.style.display = 'block';
+
+				// Show reset button
+				document.getElementById('reset-btn').style.display = 'block';
+
+				// Update progress to 100%
+				updateProgress(100);
+				alert('PDFs merged successfully! 🎉');
+			}
+
+			// Reset the app
+			function resetApp() {
+				// Clear selected files
+				selectedFiles = [];
+				document.getElementById('pdf-files').value = ''; // Clear file input
+				document.getElementById('merge-btn').disabled = true; // Disable merge button
+				document.getElementById('download-link').style.display = 'none'; // Hide download link
+				document.getElementById('reset-btn').style.display = 'none'; // Hide reset button
+				updateProgress(0); // Reset progress bar
+				updateTable(); // Clear the table
+			}
+		</script>
+	</body>
+
+</html>
